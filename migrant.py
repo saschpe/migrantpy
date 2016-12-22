@@ -110,10 +110,6 @@ def migrate(database_file, migrations_folder):
                 current_version = next_version
 
 
-def _func_migrate(args):
-    migrate(args.database, args.migrations)
-
-
 def _func_create_migration(args):
     # TODO: Implement!
     pass
@@ -127,7 +123,7 @@ def _main():
     parser_migrate = subparsers.add_parser('migrate', help='run migrations on a SQLite database file')
     parser_migrate.add_argument('database', help="SQLite database file")
     parser_migrate.add_argument('migrations', help="database migrations folder")
-    parser_migrate.set_defaults(func=_func_migrate)
+    parser_migrate.set_defaults(func=lambda args: migrate(args.database, args.migrations))
 
     # parser_create_migration = subparsers.add_parser('create-migration', help='create a new migration')
     # parser_create_migration.add_argument('name', help='migration name, e.g. \'my_new_migration\'')
@@ -137,6 +133,10 @@ def _main():
     parser_help.set_defaults(func=lambda args: parser.print_help())
 
     args = parser.parse_args()
+    if not hasattr(args, 'func'):
+        # Show help if no arguments are passed
+        args = argparse.Namespace(func=parser_help.get_default('func'))
+
     args.func(args)  # Invoke default funcs
 
 
