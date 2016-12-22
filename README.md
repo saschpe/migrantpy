@@ -18,7 +18,19 @@ import migrant
 migrant.migrate('database.sqlite', 'migrations_folder/')
 ```
 
+## Hacking
+You can create a full test database this way:
+```bash
+./migrant.py migrate test.sqlite test_migrations
+```
+
+Running the unit tests:
+```bash
+python3 -m unittest discover --locals
+```
+
 ## Download
+Install the library from the Python Package Index:
 ```bash
 pip install migrant
 ```
