@@ -23,7 +23,6 @@ import argparse
 import fnmatch
 import os
 import sqlite3
-import sys
 
 
 def _list_migrations(folder):
@@ -111,13 +110,31 @@ def migrate(database_file, migrations_folder):
                 current_version = next_version
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(prog='migrant', description='SQLite migration engine')
-    subparsers = parser.add_subparsers(title='sub-commands', help='sub-command help')
-    migrate_parser = subparsers.add_parser('migrate', help='run migrations')
-    migrate_parser.add_argument('db', type=str, help="SQLite database file")
-    migrate_parser.add_argument('-m', '--migrations-folder', type=str,
-                                help='folder containing SQLite migration files')
-    #start_migration_parser = subparsers.add_parser('start-migration', help='create a new migration')
+def _func_migrate(args):
+    migrate(args.database, args.migrations)
 
-    args = parser.parse_args(sys.argv)
+
+def _func_create_migration(args):
+    # TODO: Implement!
+    pass
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--version', action='version', version='%(prog)s {0}'.format(__version__))
+    subparsers = parser.add_subparsers()
+
+    parser_migrate = subparsers.add_parser('migrate', help='run migrations on a SQLite database file')
+    parser_migrate.add_argument('database', help="SQLite database file")
+    parser_migrate.add_argument('migrations', help="database migrations folder")
+    parser_migrate.set_defaults(func=_func_migrate)
+
+    # parser_create_migration = subparsers.add_parser('create-migration', help='create a new migration')
+    # parser_create_migration.add_argument('name', help='migration name, e.g. \'my_new_migration\'')
+    # parser_create_migration.set_defaults(func=_func_create_migration)
+
+    parser_help = subparsers.add_parser('help', help='show this help')
+    parser_help.set_defaults(func=lambda args: parser.print_help())
+
+    args = parser.parse_args()
+    args.func(args)  # Invoke default funcs
