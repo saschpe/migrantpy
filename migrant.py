@@ -14,15 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__doc__ = 'Simple SQLite database migrations'
-__docformat__ = 'restructuredtext en'
-__author__ = 'Sascha Peilicke <sascha@peilicke.de>'
-__version__ = '1.0.0'
-
 import argparse
 import fnmatch
 import os
 import sqlite3
+
+__doc__ = 'Simple SQLite database migrations'
+__docformat__ = 'restructuredtext en'
+__author__ = 'Sascha Peilicke <sascha@peilicke.de>'
+__version__ = '1.0.0'
 
 
 def _list_migrations(folder):
