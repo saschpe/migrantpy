@@ -72,9 +72,9 @@ class TestMigrant(unittest.TestCase):
         self._compare_dumps(TEST_MIGRATIONS[0], db_file_dump)
 
     def test_run_migration_first_to_second(self):
-        """Applies TEST_MIGRATIONS[1] on TEST_DATABASES[1].
+        """Applies TEST_MIGRATIONS[1] on TEST_DATABASES[0].
 
-        Result should match TEST_DATABASES[2].
+        Result should match TEST_DATABASES[1].
         """
         with tempfile.NamedTemporaryFile() as db_file:
             with sqlite3.connect(db_file.name) as conn:
@@ -86,6 +86,22 @@ class TestMigrant(unittest.TestCase):
             db_file_dump = _sqlite3_dump(db_file.name)
         # Assert
         self._compare_dumps(TEST_DATABASES[1], db_file_dump)
+
+    def test_run_migration_second_to_third(self):
+        """Applies TEST_MIGRATIONS[2] on TEST_DATABASES[1].
+
+        Result should match TEST_DATABASES[2].
+        """
+        with tempfile.NamedTemporaryFile() as db_file:
+            with sqlite3.connect(db_file.name) as conn:
+                # Arrange
+                with open(TEST_DATABASES[1]) as prepared:
+                    conn.executescript(prepared.read())
+                # Act
+                migrant.run_migration(conn, TEST_MIGRATIONS[2])
+            db_file_dump = _sqlite3_dump(db_file.name)
+        # Assert
+        self._compare_dumps(TEST_DATABASES[2], db_file_dump)
 
     @unittest.skip("")
     def test_migrate_initial(self):
