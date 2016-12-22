@@ -22,7 +22,7 @@ TEST_MIGRATIONS = {
 }
 
 
-def sqlite3_dump(filename):
+def _sqlite3_dump(filename):
     """Catch the 'dump' via shell binary, 'conn.iterdump()' always generates different output,
 
     :param filename: SQLite database file name
@@ -65,15 +65,11 @@ class TestMigrant(unittest.TestCase):
         """
         with tempfile.NamedTemporaryFile() as db_file:
             with sqlite3.connect(db_file.name) as conn:
-                # Act
+                # Arrange, act
                 migrant.run_migration(conn, TEST_MIGRATIONS[0])
-
-            # Assert
-            db_file_dump = sqlite3_dump(db_file.name)
-
-        with open(TEST_MIGRATIONS[0]) as expected_dump_file:
-            for current_dump, expected_dump in zip(db_file_dump, expected_dump_file):
-                self.assertEqual(current_dump + '\n', expected_dump)
+            db_file_dump = _sqlite3_dump(db_file.name)
+        # Assert
+        self._compare_dumps(TEST_MIGRATIONS[0], db_file_dump)
 
     def test_run_migration_first_to_second(self):
         """Applies TEST_MIGRATIONS[1] on TEST_DATABASES[1].
@@ -85,16 +81,11 @@ class TestMigrant(unittest.TestCase):
                 # Arrange
                 with open(TEST_DATABASES[0]) as prepared:
                     conn.executescript(prepared.read())
-
                 # Act
                 migrant.run_migration(conn, TEST_MIGRATIONS[1])
-
-            # Assert
-            db_file_dump = sqlite3_dump(db_file.name)
-
-        with open(TEST_DATABASES[1]) as expected_dump_file:
-            for current_dump, expected_dump in zip(db_file_dump, expected_dump_file):
-                self.assertEqual(current_dump + '\n', expected_dump)
+            db_file_dump = _sqlite3_dump(db_file.name)
+        # Assert
+        self._compare_dumps(TEST_DATABASES[1], db_file_dump)
 
     @unittest.skip("")
     def test_migrate_initial(self):
@@ -107,6 +98,12 @@ class TestMigrant(unittest.TestCase):
     @unittest.skip("")
     def test_migrate_first_to_second(self):
         pass
+
+    def _compare_dumps(self, expected, current):
+        with open(expected) as expected_dump_file:
+            for current_dump, expected_dump in zip(current, expected_dump_file):
+                self.assertEqual(current_dump + '\n', expected_dump)
+
 
 
 if __name__ == '__main__':
