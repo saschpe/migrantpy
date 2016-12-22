@@ -29,6 +29,12 @@ Running the unit tests:
 python3 -m unittest discover --locals
 ```
 
+Or install locally:
+```bash
+python setup.py install --user
+migrate -h
+```
+
 ## Download
 Install the library from the Python Package Index:
 ```bash
