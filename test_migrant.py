@@ -1,5 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright 2016 Sascha Peilicke
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import migrant
 import os.path
 import sqlite3
@@ -34,27 +48,27 @@ def _sqlite3_dump(filename):
 class TestMigrant(unittest.TestCase):
     def test_list_migrations(self):
         expected_migrations = TEST_MIGRATIONS
-        migrations = migrant.list_migrations(TEST_MIGRATIONS_DIR)
+        migrations = migrant._list_migrations(TEST_MIGRATIONS_DIR)
         self.assertDictEqual(migrations, expected_migrations)
 
     def test_get_schema_version(self):
         expected_schema_version = 0
         with tempfile.NamedTemporaryFile() as db_file:
             with sqlite3.connect(db_file.name) as conn:
-                cur_ver = migrant.get_schema_version(conn)
+                cur_ver = migrant._get_schema_version(conn)
                 self.assertEqual(cur_ver, expected_schema_version)
 
     def test_set_schema_version(self):
         expected_schema_version = 1
         with tempfile.NamedTemporaryFile() as db_file:
             with sqlite3.connect(db_file.name) as conn:
-                migrant.set_schema_version(conn, expected_schema_version)
-                cur_ver = migrant.get_schema_version(conn)
+                migrant._set_schema_version(conn, expected_schema_version)
+                cur_ver = migrant._get_schema_version(conn)
                 self.assertEqual(cur_ver, expected_schema_version)
 
     def test_get_target_schema_version(self):
         expected_target_version = 2
-        target_version = migrant.get_target_schema_version(TEST_MIGRATIONS)
+        target_version = migrant._get_target_schema_version(TEST_MIGRATIONS)
         self.assertEqual(target_version, expected_target_version)
 
     def test_run_migration_initial(self):
@@ -66,7 +80,7 @@ class TestMigrant(unittest.TestCase):
         with tempfile.NamedTemporaryFile() as db_file:
             with sqlite3.connect(db_file.name) as conn:
                 # Arrange, act
-                migrant.run_migration(conn, TEST_MIGRATIONS[0])
+                migrant._run_migration(conn, TEST_MIGRATIONS[0])
             db_file_dump = _sqlite3_dump(db_file.name)
         # Assert
         self._compare_dumps(TEST_MIGRATIONS[0], db_file_dump)
@@ -150,7 +164,7 @@ class TestMigrant(unittest.TestCase):
                     conn.executescript(prepared.read())
 
                 # Act
-                migrant.run_migration(conn, migration)
+                migrant._run_migration(conn, migration)
 
                 # Assert
             db_file_dump = _sqlite3_dump(db_file.name)
@@ -158,10 +172,10 @@ class TestMigrant(unittest.TestCase):
 
     def _assert_migrate(self, db_file_name):
         with sqlite3.connect(db_file_name) as conn:
-            db_file_schema_version = migrant.get_schema_version(conn)
+            db_file_schema_version = migrant._get_schema_version(conn)
         db_file_dump = _sqlite3_dump(db_file_name)
         self._compare_dumps(TEST_MIGRATIONS[0], db_file_dump)
-        self.assertEqual(db_file_schema_version, migrant.get_target_schema_version(TEST_MIGRATIONS))
+        self.assertEqual(db_file_schema_version, migrant._get_target_schema_version(TEST_MIGRATIONS))
 
     def _compare_dumps(self, expected, current):
         """Compares two SQLite dumps for equality.
