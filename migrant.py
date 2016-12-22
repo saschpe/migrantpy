@@ -119,7 +119,7 @@ def _func_create_migration(args):
     pass
 
 
-if __name__ == '__main__':
+def _main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--version', action='version', version='%(prog)s {0}'.format(__version__))
     subparsers = parser.add_subparsers()
@@ -138,3 +138,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     args.func(args)  # Invoke default funcs
+
+
+if __name__ == '__main__':
+    _main()
