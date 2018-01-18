@@ -1,5 +1,7 @@
 language: python
 python:
   - 3.6
+before_install:
+  - sqlite3 --version
 script:
   - python3 -m unittest discover --locals
