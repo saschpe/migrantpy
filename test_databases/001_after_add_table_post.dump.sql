@@ -1,0 +1,13 @@
+PRAGMA foreign_keys=OFF;
+BEGIN TRANSACTION;
+CREATE TABLE `post` (
+	`id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+	`title`	TEXT NOT NULL,
+	`body`	TEXT NOT NULL,
+	`created_at`	INTEGER DEFAULT CURRENT_TIMESTAMP,
+	`updated_at`	INTEGER DEFAULT CURRENT_TIMESTAMP
+);
+INSERT INTO post VALUES(1,'Hello World','This is the first blog post!','2016-12-22 08:32:08','2016-12-22 08:32:08');
+INSERT INTO post VALUES(2,'Again','Another blog post','2016-12-22 08:32:22','2016-12-22 08:32:22');
+INSERT INTO post VALUES(3,'Migrant rocks!','Check it out...','2016-12-22 08:32:43','2016-12-22 08:32:43');
+COMMIT;
