@@ -1,21 +1,21 @@
-# Migrant
+# Migrantpy
 [![License](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
-Simple SQLite database migrations.
+Simple SQLite database migrations library for Python.
 
 ## Usage
 
 The library can be used either as a command line utility:
 
 ```bash
-migrant migrate database.sqlite migrations_folder/
+migrantpy migrate database.sqlite migrations_folder/
 ```
 
 Or as a *Python* library:
 
 ```python
-import migrant
-migrant.migrate('database.sqlite', 'migrations_folder/')
+import migrantpy
+migrantpy.migrate('database.sqlite', 'migrations_folder/')
 ```
 
 ## Hacking
@@ -38,7 +38,7 @@ migrate -h
 ## Download
 Install the library from the Python Package Index:
 ```bash
-pip install migrant
+pip install migrantpy
 ```
 
 ## License

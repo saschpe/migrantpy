@@ -19,22 +19,22 @@ try:
 except ImportError:
     from distutils.core import setup
 
-import migrant
+import migrantpy
 
 with open("README.md", "r") as f:
     long_description = f.read()
 
 setup(
-    name=migrant.__name__,
-    version=migrant.__version__,
+    name=migrantpy.__name__,
+    version=migrantpy.__version__,
     license="Apache-2.0",
-    description=migrant.__doc__,
+    description=migrantpy.__doc__,
     long_description=long_description,
-    author=migrant.__author__.rsplit(' ', 1)[0],
-    author_email=migrant.__author__.rsplit(' ', 1)[1][1:-1],
-    url='http://github.com/saschpe/migrant',
-    scripts=['migrant.py', 'scripts/migrant'],
-    data_files=[('share/doc/migrant', ['LICENSE.txt', 'README.md'])],
+    author=migrantpy.__author__.rsplit(' ', 1)[0],
+    author_email=migrantpy.__author__.rsplit(' ', 1)[1][1:-1],
+    url='http://github.com/saschpe/migrantpy',
+    scripts=['migrantpy.py', 'scripts/migrantpy'],
+    data_files=[('share/doc/migrantpy', ['LICENSE.txt', 'README.md'])],
     test_suite="nose.collector",
     classifiers=[
         'Development Status :: 4 - Beta',
