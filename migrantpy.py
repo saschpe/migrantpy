@@ -71,7 +71,9 @@ def _get_target_schema_version(migrations):
     :param migrations: Migrations dictionary
     :return: Desired schema version
     """
-    return len(migrations.keys()) - 1
+    mkeys = list(migrations.keys())
+    mkeys.sort(reverse=True)
+    return mkeys[0]
 
 
 def _run_migration(cursor, migration_filename):
@@ -80,7 +82,11 @@ def _run_migration(cursor, migration_filename):
     :param cursor: SQLite database cursor
     :param migration_filename: File containing SQL statements to execute
     """
+    if migration_filename is None:
+        return None
+
     with open(migration_filename) as migration_file:
+        print(f"Migrating {migration_filename} ...")
         migration_sql = migration_file.read()
         cursor.executescript(migration_sql)
 
@@ -100,15 +106,11 @@ def migrate(database_file, migrations_folder):
     with sqlite3.connect(database_file) as conn:
         current_version = _get_schema_version(conn)
         target_version = _get_target_schema_version(migrations)
-        if current_version == 0:
-            _run_migration(conn, migrations[0])
-            _set_schema_version(conn, target_version)
-        else:
-            while current_version < target_version:
-                next_version = current_version + 1
-                _run_migration(conn, migrations[next_version])
-                _set_schema_version(conn, next_version)
-                current_version = next_version
+        next_version = current_version + 1
+        while next_version <= target_version:
+            _run_migration(conn, migrations.get(next_version))
+            _set_schema_version(conn, next_version)
+            next_version += 1
 
 
 def _create_migration(name, migrations_folder):
