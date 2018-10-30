@@ -18,6 +18,7 @@ import argparse
 import fnmatch
 import os
 import sqlite3
+import re
 
 __doc__ = 'Simple SQLite database migrations'
 __docformat__ = 'restructuredtext en'
@@ -70,7 +71,9 @@ def _get_target_schema_version(migrations):
     :param migrations: Migrations dictionary
     :return: Desired schema version
     """
-    return len(migrations.keys()) - 1
+    mkeys = list(migrations.keys())
+    mkeys.sort(reverse=True)
+    return mkeys[0]
 
 
 def _run_migration(cursor, migration_filename):
@@ -79,7 +82,11 @@ def _run_migration(cursor, migration_filename):
     :param cursor: SQLite database cursor
     :param migration_filename: File containing SQL statements to execute
     """
+    if migration_filename is None:
+        return None
+
     with open(migration_filename) as migration_file:
+        print(f"Migrating {migration_filename} ...")
         migration_sql = migration_file.read()
         cursor.executescript(migration_sql)
 
@@ -99,20 +106,25 @@ def migrate(database_file, migrations_folder):
     with sqlite3.connect(database_file) as conn:
         current_version = _get_schema_version(conn)
         target_version = _get_target_schema_version(migrations)
-        if current_version == 0:
-            _run_migration(conn, migrations[0])
-            _set_schema_version(conn, target_version)
-        else:
-            while current_version < target_version:
-                next_version = current_version + 1
-                _run_migration(conn, migrations[next_version])
-                _set_schema_version(conn, next_version)
-                current_version = next_version
+        next_version = current_version + 1
+        while next_version <= target_version:
+            _run_migration(conn, migrations.get(next_version))
+            _set_schema_version(conn, next_version)
+            next_version += 1
 
 
-def _func_create_migration(args):
-    # TODO: Implement!
-    pass
+def _create_migration(name, migrations_folder):
+    migrations = os.listdir(migrations_folder)
+    migrations.sort()
+    try:
+        current_version = int( re.match(r"^(\d+)", migrations[-1]).group(1))
+    except Exception as err:
+        current_version = 0
+    next_version_str = str(current_version+1).zfill(3)
+    migration_name = f"{next_version_str}_{re.sub(r'[^0-9A-Za-z_]', '_', name)}.sql"
+    migration_path = os.path.join(migrations_folder, migration_name)
+    print(f'Creating {migration_path} ...')
+    open(migration_path, 'a').close()
 
 
 def _main():
@@ -125,9 +137,10 @@ def _main():
     parser_migrate.add_argument('migrations', help="database migrations folder")
     parser_migrate.set_defaults(func=lambda args: migrate(args.database, args.migrations))
 
-    # parser_create_migration = subparsers.add_parser('create-migration', help='create a new migration')
-    # parser_create_migration.add_argument('name', help='migration name, e.g. \'my_new_migration\'')
-    # parser_create_migration.set_defaults(func=_func_create_migration)
+    parser_create_migration = subparsers.add_parser('create', help='create a new migration')
+    parser_create_migration.add_argument('name', help='migration name, e.g. \'my new migration\'')
+    parser_create_migration.add_argument('--migrations', help="database migrations folder, or default 'migrations'", default='./migrations', required=False)
+    parser_create_migration.set_defaults(func=lambda args: _create_migration(args.name, args.migrations))
 
     parser_help = subparsers.add_parser('help', help='show this help')
     parser_help.set_defaults(func=lambda args: parser.print_help())
